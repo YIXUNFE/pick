@@ -72,6 +72,11 @@ pickData.get('a') // undefined
 pickData.set('x', {})
 
 pickData.get('x') // {}
+
+pickData.set('new_path', 'new_path', 'new_value')
+
+pickData.get('new_key') // 'new_value'
+
 ```
 
 ### copy
