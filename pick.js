@@ -1,9 +1,9 @@
 "use strict"
 ;(function () {  
-  var debugMode = true
-  var log = (function () {
-    return (window.console && console.log && debugMode) ? console.log : function () {}
-  }())
+  var debugMode = true,
+    log = function (str) {
+      window.console && console.log(str)
+    }
 
   var pick = function (data) {
     if (Object.prototype.toString.apply(data) !== '[object Object]') {
