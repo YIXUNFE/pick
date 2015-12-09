@@ -1,7 +1,8 @@
 "use strict"
 ;(function () {  
+  var debugMode = true
   var log = (function () {
-    return window.console ? console.log : function () {}
+    return (window.console && console.log && debugMode) ? console.log : function () {}
   }())
 
   var pick = function (data) {
@@ -12,7 +13,7 @@
     /**
      * check 方法会返回数据中是否具有对应的属性
      * @type {Function} 
-     * @param {String [, String, ...]} 一个或多个字符串参数，表示对应的层级关系
+     * @param {String|Function [, String|Function, ...]} 一个或多个字符串参数，表示对应的层级关系。该方法支持参数以函数形式传入。
      * @return {Boolean} 返回一个布尔值
      **/
     function check () {
@@ -22,8 +23,8 @@
         num = 0,
         path = ''
       for (i; i < l; i++) {
-        path = arguments[i]
-        if (!temp[path]) break
+        path = (typeof arguments[i] !== 'function' ? arguments[i] : arguments[i]()) + ''
+        if (!temp.hasOwnProperty || !temp.hasOwnProperty(path)) break
         temp = temp[path]
         num++
       }
@@ -48,7 +49,7 @@
      * map 方法会遍历数据并返回一个新的 pick 对象
      * @type {Function} 
      * @param {Function} 遍历过程中执行的函数，返回值会被赋值给新数据，没有返回值则使用原数据值
-     * @return {Object} 返回一个 pick 对象
+     * @return {Object} 返回一个新的 pick 对象
      **/
     function map (fn) {
       if (typeof fn !== 'function') {log('filter 方法中参数类型错误，期望是一个函数'); return}
@@ -147,7 +148,7 @@
     /**
      * get 方法会去查找 pick 对象数据中的值
      * @type {Function} 
-     * @param {String [, String, ...]} 一个或多个字符串参数，表示对应的层级关系。方法支持传入函数。
+     * @param {String|Function [, String|Function, ...]} 一个或多个字符串参数，表示对应的层级关系。该方法支持参数以函数形式传入。
      * @return {*} 返回满足条件的值，没有满足的返回 undefined
      **/
     function get () {
@@ -167,7 +168,7 @@
     /**
      * set 方法可以给 pick 对象的数据设置对应层级关系的值
      * @type {Function} 
-     * @param {String, [String, ...,] *} 一个或多个字符串参数，表示对应的层级关系，最后一个参数表示需要设置的值。方法支持传入函数。
+     * @param {String|Function, [String|Function, ...,] *} 一个或多个字符串参数，表示对应的层级关系，最后一个参数表示需要设置的值。该方法支持参数以函数形式传入。
      * @return {Object} 返回调用 set 方法的 pick 对象自身
      * @notice 如果设置的层级属性的某个中间属性并非 Object 类型，该属性会被设置为 Object 类型，并继续尝试对其建立子层级
      * 比如 
@@ -196,6 +197,11 @@
       return this
     }
     
+    /**
+     * out 方法返回 pick 对象的数据
+     * @type {Function} 
+     * @return {Object} 返回 pick 对象的数据
+     **/
     function out () {
       return data
     }

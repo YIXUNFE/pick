@@ -39,16 +39,29 @@ describe('测试 check 方法', function() {
     expect(r6).toBe(false)
   })
   
-  it("当数据值未定义时，check 方法将返回 false", function() {
+  it("当数据中的属性值是 undefined 时，check 方法应该正常返回 true", function() {
     var a = {a: window.undefined}
     var d = pick(a)
     var r1 = d.check('a')
     
+    expect(r1).toBe(true)
+  })
+  
+  it("当传入参数是函数时，check 方法应该使用函数返回值进行查找", function() {
+    var a = {a: 1, b: {c: {d: 100}}, 'undefined': 'string'}
+    var d = pick(a)
+    var r1 = d.check(function () {})
+    expect(r1).toBe(true)
+    
+    r1 = d.check(function () {return 'b'}, function () {return 'c'})
+    expect(r1).toBe(true)
+    
+    r1 = d.check(function () {return 'b'}, function () {return 'd'})
     expect(r1).toBe(false)
   })
 })
 describe('测试 copy 方法', function() {
-  it('调用后，应该返回一个新的 pick 对象且和原数据没有引用关系', function() {
+  it('调用后，应该返回一个新的 pick 对象且其数据和原数据没有引用关系', function() {
     var a = {a: 1, b: 2, c: 3}
     var d = pick(a)
     var p = d.copy()
@@ -160,7 +173,7 @@ describe('测试 extendTo 方法', function() {
   })
 })
 describe('测试 filter 方法', function() {
-  it('在谓词函数中满足条件时返回 true，filter 方法返回的 pick 对象中应该有满足条件的数据', function() {
+  it('在参数函数中满足条件时返回 true，filter 方法返回的 pick 对象中应该有满足条件的数据', function() {
     var a = {a: 1, b: 2, c: 3}
       
     var r1 = pick(a).filter(function (v, k) {
@@ -172,7 +185,7 @@ describe('测试 filter 方法', function() {
     expect(r1.c).toBeDefined()
   })
   
-  it('在谓词函数中返回 1，filter 方法返回的 pick 对象的数据应该为空对象', function() {
+  it('在参数函数的返回值不是 true，filter 方法返回的 pick 对象的数据应该为空对象', function() {
     var a = {a: 1, b: 2, c: 3}
       
     var r1 = pick(a).filter(function (v, k) {
@@ -184,19 +197,7 @@ describe('测试 filter 方法', function() {
     expect(r1.c).not.toBeDefined()
   })
   
-  it('在谓词函数中无返回，filter 方法返回的 pick 对象的数据应该为空对象', function() {
-    var a = {a: 1, b: 2, c: 3}
-      
-    var r1 = pick(a).filter(function (v, k) {
-      v = v + 1
-    }).out()
-    
-    expect(r1.a).not.toBeDefined()
-    expect(r1.b).not.toBeDefined()
-    expect(r1.c).not.toBeDefined()
-  })
-  
-  it('在谓词函数中无返回，filter 方法返回的 pick 对象的数据应该为空对象', function() {
+  it('在参数函数中无返回，filter 方法返回的 pick 对象的数据应该为空对象', function() {
     var a = {a: 1, b: 2, c: 3}
       
     var r1 = pick(a).filter(function (v, k) {
@@ -233,7 +234,15 @@ describe('测试 get 方法', function() {
     expect(d.get()).not.toBeDefined()
   })
   
-  it('传入非字符串参数时，应该会被转换成字符串类型', function() {
+  it('传入函数参数时，应该通过函数返回值获取路径', function() {
+    var a = {a: 1, b: 2, c: 3, x: {y: {z: 0}}, 'undefined': 'undefined'}
+    var d = pick(a)
+    
+    expect(d.get(function () {})).toBe('undefined')
+    expect(d.get(function () {return 'a'})).toBe(1)
+  })
+  
+  it('传入即非字符串，也非函数参数时，应该会被转换成字符串类型', function() {
     var a = {'0': 1, 'null': 3}
     var d = pick(a)
     
@@ -316,12 +325,20 @@ describe('测试 map 方法', function() {
     var r1 = d.map()
     expect(r1).not.toBeDefined()
   })
-  
-  it('当参数并非函数时，map 方法不执行任何操作', function() {
+})
+describe('测试 out 方法', function() {
+  it('调用后，应该返回原数据且引用关系存在', function() {
     var a = {a: 1, b: 2, c: 3}
     var d = pick(a)
-    var r1 = d.map()
-    expect(r1).not.toBeDefined()
+    expect(d.out() === a).toBe(true)
+  })
+  
+  it('对返回值进行修改后，pick 对象的数据应该是修改后的数据', function() {
+    var a = {a: 1, b: 2, c: 3}
+    var d = pick(a)
+    var p = d.out()
+    p.a = 100
+    expect(d.get('a') === 100).toBe(true)
   })
 })
 describe('测试 set 方法', function() {
@@ -343,7 +360,15 @@ describe('测试 set 方法', function() {
     expect(d.get('b', 'e')).toBe(2)
   })
   
-  it('传入非字符串参数时，应该会被转换成字符串类型', function() {
+  it('传入函数参数时，应该通过函数返回值获取路径', function() {
+    var a = {a: 1, b: 2, c: 3, x: {y: {z: 0}}, 'undefined': 'undefined'}
+    var d = pick(a)
+    
+    expect(d.set(function () {}, 'seted').get('undefined')).toBe('seted')
+    expect(d.set(function () {return 'a'}, 100).get('a')).toBe(100)
+  })
+  
+  it('传入即非字符串，也非函数参数时，应该会被转换成字符串类型', function() {
     var a = {'0': 1, 'null': 3}
     var d = pick(a)
     d.set(0, 100)

@@ -1,5 +1,5 @@
 describe('测试 copy 方法', function() {
-  it('调用后，应该返回一个新的 pick 对象且和原数据没有引用关系', function() {
+  it('调用后，应该返回一个新的 pick 对象且其数据和原数据没有引用关系', function() {
     var a = {a: 1, b: 2, c: 3}
     var d = pick(a)
     var p = d.copy()

@@ -39,11 +39,24 @@ describe('测试 check 方法', function() {
     expect(r6).toBe(false)
   })
   
-  it("当数据值未定义时，check 方法将返回 false", function() {
+  it("当数据中的属性值是 undefined 时，check 方法应该正常返回 true", function() {
     var a = {a: window.undefined}
     var d = pick(a)
     var r1 = d.check('a')
     
+    expect(r1).toBe(true)
+  })
+  
+  it("当传入参数是函数时，check 方法应该使用函数返回值进行查找", function() {
+    var a = {a: 1, b: {c: {d: 100}}, 'undefined': 'string'}
+    var d = pick(a)
+    var r1 = d.check(function () {})
+    expect(r1).toBe(true)
+    
+    r1 = d.check(function () {return 'b'}, function () {return 'c'})
+    expect(r1).toBe(true)
+    
+    r1 = d.check(function () {return 'b'}, function () {return 'd'})
     expect(r1).toBe(false)
   })
 })

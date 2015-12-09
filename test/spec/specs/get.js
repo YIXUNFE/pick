@@ -16,7 +16,15 @@ describe('测试 get 方法', function() {
     expect(d.get()).not.toBeDefined()
   })
   
-  it('传入非字符串参数时，应该会被转换成字符串类型', function() {
+  it('传入函数参数时，应该通过函数返回值获取路径', function() {
+    var a = {a: 1, b: 2, c: 3, x: {y: {z: 0}}, 'undefined': 'undefined'}
+    var d = pick(a)
+    
+    expect(d.get(function () {})).toBe('undefined')
+    expect(d.get(function () {return 'a'})).toBe(1)
+  })
+  
+  it('传入即非字符串，也非函数参数时，应该会被转换成字符串类型', function() {
     var a = {'0': 1, 'null': 3}
     var d = pick(a)
     

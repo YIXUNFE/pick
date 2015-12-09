@@ -58,11 +58,4 @@ describe('测试 map 方法', function() {
     var r1 = d.map()
     expect(r1).not.toBeDefined()
   })
-  
-  it('当参数并非函数时，map 方法不执行任何操作', function() {
-    var a = {a: 1, b: 2, c: 3}
-    var d = pick(a)
-    var r1 = d.map()
-    expect(r1).not.toBeDefined()
-  })
 })
