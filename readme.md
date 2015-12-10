@@ -1,6 +1,6 @@
 # Pick
 
-简单的对象处理工具。（文档完善中）
+简单的对象处理工具。
 
 <br />
 
@@ -170,38 +170,136 @@ pickData.set('a', 'b', 'c', 'value').out() // {a: {b: {c: 'value'}}}
 
 #### copy
 
+`copy` 方法会返回一个新的 `pick` 对象，该对象的数据和原数据没有引用关系。
+
 ```javascript
+var data = {a: 'v1'}
+var pickData = pick(data)
 var a = pickData.copy()
 
-a === pickData.out() // false
+a.out() === pickData.out() // false
 ```
+
+如果需要刻意打断引用且不改变数据的属性和值，`copy` 方法是最直接的。
 
 <br />
 
 #### extend
 
+`extend` 方法可以为 `pick` 对象的数据合并新的内容。方法需要传入一个对象作为被合并的内容。
+
 ```javascript
-pickData.extend({a: 'string'})
+var data = {a: 'v1'}
+var pickData = pick(data)
+pickData.extend({b: 2})
 
 pickData.out() 
-// {x: 1, y: 0, z: null, a: 'string'}
+// {a: 'v1', b: 2}
+```
+
+`extend` 方法回返回 pick 对象自身，可以做链式调用。
+
+```javascript
+var data = {a: 'v1'}
+var pickData = pick(data)
+pickData.extend({b: 2}).out() 
+// {a: 'v1', b: 2}
 ```
 
 <br />
 
 #### extendTo
 
+`extendTo` 方法和 `extend` 方法类似，但是它并不会改变原数据，而是将原数据作为被合并内容，得到一个新的数据并返回处理该数据的 `pick` 对象。
+
 ```javascript
-pickData.extendTo({a: 'string'})
-// {x: 1, y: 0, z: null, a: 'string'}
+var data = {a: 'v1'}
+var pickData = pick(data)
+var newData = pickData.extendTo({b: 2})
+
+newData.out()
+// {a: 'v1', b: 2}
 
 pickData.out() 
-// {x: 1, y: 0, z: null}
+// {a: 'v1'}
+```
+
+<br />
+
+#### map
+
+`map` 方法会遍历 `pick` 对象的数据并返回一个新的 `pick` 对象。
+
+```javascript
+var data = {a: 'v1', b: 2}
+var pickData = pick(data)
+
+var newData = pickData.map(function (v, k) {
+  return v + 'xxx'
+})
+
+newData.out()
+// {a: 'v1xxx', b: '2xxx'}
+pickData.out()
+// {a: 'v1', b: 2}
+
+```
+
+`map` 方法会根据所传入的参数函数的返回值作为新 `pick` 对象的数据值。当函数没有返回值时，使用原数据的值。
+
+```javascript
+var data = {a: 'v1', b: 2}
+var pickData = pick(data)
+
+var newData = pickData.map(function (v, k) {
+  v = v + 'xxx'
+})
+
+newData.out()
+// {a: 'v1', b: '2'}
+pickData.out()
+// {a: 'v1', b: 2}
+newData.out() === pickData.out()
+//false
+```
+
+<br />
+
+#### filter
+
+`filter` 方法也会遍历数据，其返回一个新 `pick` 对象，对象的数据由 `filter` 方法所传入的参数决定。
+
+```javascript
+var data = {a: 'v1', b: 2}
+var pickData = pick(data)
+
+var newData = pickData.filter(function (v, k) {
+  return v === 'v1'
+})
+
+newData.out()
+// {a: 'v1'}
+```
+
+<br />
+
+#### length
+
+`length` 方法返回数据的子属性个数，但不包含子属性的属性个数（如果该属性的值是对象的话）。
+
+```javascript
+var data = {a: 'v1', b: 2}
+var pickData = pick(data)
+
+pickData.length()
+// 2
 ```
 
 <br />
 
 #### destroy
+
+`destroy` 方法会销毁 `pick` 对象的所有方法。
 
 ```javascript
 pickData.destroy()
